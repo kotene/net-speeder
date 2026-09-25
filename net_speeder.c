@@ -128,11 +128,14 @@ int main(int argc, char **argv) {
 		printf("set filter failed:[%s][%s]\n", filter_rule, pcap_geterr(handle));
 		return -1;
 	}
-
-	while(1) {
-		pcap_loop(handle, 1, got_packet, (u_char *)libnet_handler);
+    int loop_status;
+	loop_status = pcap_loop(handle, -1, got_packet, (u_char *)libnet_handler);
+	if (loop_status == -1) {
+		printf("pcap_loop error: %s\n", pcap_geterr(handle));
+	} else if (loop_status == -2) {
+		printf("pcap_loop terminated by breakloop.\n");
 	}
-
+	
 	/* cleanup */
 	pcap_freecode(&fp);
 	pcap_close(handle);
